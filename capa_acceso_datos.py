@@ -1,18 +1,23 @@
 # capa_acceso_datos.py
 from pymongo import MongoClient
 
-class CineDatos:
-    def __init__(self):
-        self.cliente = MongoClient('mongodb://localhost:27017/')
-        self.db = self.cliente['cine_db']
-        self.boletas = self.db['boletas']
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
 
-    def obtener_boletas(self):
-        return list(self.boletas.find())
+class ConexionMongoDB:
+    def __init__(self, uri):
+        self.uri = uri
+        self.client = None
+        self.db = None
 
-    def obtener_boleta_por_asiento(self, asiento):
-        return self.boletas.find_one({'asiento': asiento})
+    def conectar(self, db_name):
+        self.client = MongoClient(self.uri, server_api=ServerApi('1'))
+        self.db = self.client[db_name]
 
-    def actualizar_boleta(self, asiento, datos_actualizados):
-        resultado = self.boletas.update_one({'asiento': asiento}, {'$set': datos_actualizados})
-        return resultado.modified_count > 0
+    def obtener_db(self):
+        return self.db
+
+uri = "mongodb+srv://MirandaYo:Paradoxa10@cluster0.zlkxkhi.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+conexion = ConexionMongoDB(uri)
+conexion.conectar('venta_boletos')
+db = conexion.obtener_db()

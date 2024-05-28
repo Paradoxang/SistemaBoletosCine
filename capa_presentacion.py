@@ -1,53 +1,119 @@
-Python 3.10.4 (tags/v3.10.4:9d38120, Mar 23 2022, 23:13:41) [MSC v.1929 64 bit (AMD64)] on win32
-Type "help", "copyright", "credits" or "license()" for more information.
-# capa_presentacion.py
-from capa_logica import CineLogica
+from capa_logica import LogicaBoletos
+from capa_acceso_datos import ConexionMongoDB
 
-class CinePresentacion:
-    def __init__(self):
-        self.logica = CineLogica()
+def menu():
+    print("Bienvenido al sistema de gestión de boletos del Cinema")
+    print("1. Crear Reserva de Boleto")
+    print("2. Ver Reservas de Boletos")
+    print("3. Actualizar Reserva de Boleto")
+    print("4. Eliminar Reserva de Boleto")
+    print("5. Crear Película")
+    print("6. Ver Películas")
+    print("7. Actualizar Película")
+    print("8. Eliminar Película")
+    print("9. Salir")
 
-    def mostrar_menu(self):
-        while True:
-            print("\n=== Sistema de Reserva de Boletas de Cine ===")
-            print("1. Ver boletas")
-            print("2. Reservar boleta")
-            print("3. Cancelar reserva")
-            print("4. Salir")
-            opcion = input("Seleccione una opción: ")
-            if opcion == '1':
-                self.ver_boletas()
-            elif opcion == '2':
-                self.reservar_boleta()
-            elif opcion == '3':
-                self.cancelar_reserva()
-            elif opcion == '4':
-                break
+def main():
+    uri = "mongodb+srv://MirandaYo:Paradoxa10@cluster0.zlkxkhi.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+    conexion = ConexionMongoDB(uri)
+    conexion.conectar("venta_boletos")
+    logica_boletos = LogicaBoletos(conexion.obtener_db())
+
+    while True:
+        menu()
+        opcion = input("Seleccione una opción: ")
+
+        if opcion == '1':
+            orden_compra = input("Número de Orden de Compra: ")
+            cantidad = int(input("Cantidad: "))
+            nombre_pelicula = input("Nombre de la Película: ")
+            nombre_sala = input("Nombre de la Sala de Cine: ")
+            boleto_id = logica_boletos.crear_boleto(orden_compra, cantidad, nombre_pelicula, nombre_sala)
+            if boleto_id:
+                print(f"Reserva de boleto creada con ID: {boleto_id}")
+
+        elif opcion == '2':
+            boletos = logica_boletos.obtener_boletos()
+            for boleto in boletos:
+                print(boleto)
+
+        elif opcion == '3':
+            boleto_id = input("ID de la Reserva a actualizar: ")
+            orden_compra = input("Nuevo Número de Orden de Compra (dejar en blanco para no cambiar): ")
+            cantidad = input("Nueva Cantidad (dejar en blanco para no cambiar): ")
+            nombre_pelicula = input("Nuevo Nombre de Película (dejar en blanco para no cambiar): ")
+            nombre_sala = input("Nuevo Nombre de la Sala de Cine (dejar en blanco para no cambiar): ")
+
+            actualizacion = {}
+            if orden_compra:
+                actualizacion["orden_compra"] = orden_compra
+            if cantidad:
+                actualizacion["Cantidad"] = int(cantidad)
+            if nombre_pelicula:
+                actualizacion["Nombre_pelicula"] = nombre_pelicula
+            if nombre_sala:
+                actualizacion["Nombre_sala"] = nombre_sala
+
+            result = logica_boletos.actualizar_boleto(boleto_id, actualizacion)
+            if result and result.modified_count > 0:
+                print("Reserva de boleto actualizada correctamente")
             else:
-                print("Opción no válida. Intente de nuevo.")
+                print("No se encontró la reserva o no hubo cambios")
 
-    def ver_boletas(self):
-        boletas = self.logica.obtener_boletas()
-        for boleta in boletas:
-            print(f"ID: {boleta['_id']}, Película: {boleta['pelicula']}, Asiento: {boleta['asiento']}, Reservado: {boleta['reservado']}")
+        elif opcion == '4':
+            boleto_id = input("ID de la Reserva a eliminar: ")
+            result = logica_boletos.eliminar_boleto(boleto_id)
+            if result.deleted_count > 0:
+                print("Reserva de boleto eliminada correctamente")
+            else:
+                print("No se encontró la reserva")
 
-    def reservar_boleta(self):
-        pelicula = input("Ingrese el nombre de la película: ")
-        asiento = input("Ingrese el número de asiento: ")
-        resultado = self.logica.reservar_boleta(pelicula, asiento)
-        if resultado:
-            print("Boleta reservada con éxito.")
+        elif opcion == '5':
+            nombre = input("Nombre de la Película: ")
+            duracion_minutos = int(input("Duración (minutos): "))
+            genero = input("Género: ")
+            pelicula_id = logica_boletos.crear_pelicula(nombre, duracion_minutos, genero)
+            print(f"Película creada con ID: {pelicula_id}")
+
+        elif opcion == '6':
+            peliculas = logica_boletos.obtener_peliculas()
+            for pelicula in peliculas:
+                print(pelicula)
+
+        elif opcion == '7':
+            pelicula_id = input("ID de la Película a actualizar: ")
+            nombre = input("Nuevo Nombre (dejar en blanco para no cambiar): ")
+            duracion_minutos = input("Nueva Duración (dejar en blanco para no cambiar): ")
+            genero = input("Nuevo Género (dejar en blanco para no cambiar): ")
+
+            actualizacion = {}
+            if nombre:
+                actualizacion["Nombre"] = nombre
+            if duracion_minutos:
+                actualizacion["duracion_minutos"] = int(duracion_minutos)
+            if genero:
+                actualizacion["genero"] = genero
+
+            result = logica_boletos.actualizar_pelicula(pelicula_id, actualizacion)
+            if result.modified_count > 0:
+                print("Película actualizada correctamente")
+            else:
+                print("No se encontró la película o no hubo cambios")
+
+        elif opcion == '8':
+            pelicula_id = input("ID de la Película a eliminar: ")
+            result = logica_boletos.eliminar_pelicula(pelicula_id)
+            if result.deleted_count > 0:
+                print("Película eliminada correctamente")
+            else:
+                print("No se encontró la película")
+
+        elif opcion == '9':
+            print("Saliendo del sistema")
+            break
+
         else:
-            print("Error al reservar la boleta.")
-
-    def cancelar_reserva(self):
-        asiento = input("Ingrese el número de asiento a cancelar: ")
-        resultado = self.logica.cancelar_reserva(asiento)
-        if resultado:
-            print("Reserva cancelada con éxito.")
-        else:
-            print("Error al cancelar la reserva.")
+            print("Opción no válida, intente de nuevo")
 
 if __name__ == "__main__":
-    app = CinePresentacion()
-    app.mostrar_menu()
+    main()
