@@ -104,3 +104,5 @@ class LogicaBoletos:
 
     def eliminar_pelicula(self, pelicula_id):
         return self.peliculas_collection.delete_one({"_id": ObjectId(pelicula_id)})
+
+##45

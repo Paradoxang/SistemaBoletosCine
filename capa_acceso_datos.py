@@ -21,3 +21,5 @@ uri = "mongodb+srv://MirandaYo:Paradoxa10@cluster0.zlkxkhi.mongodb.net/?retryWri
 conexion = ConexionMongoDB(uri)
 conexion.conectar('venta_boletos')
 db = conexion.obtener_db()
+
+##45
