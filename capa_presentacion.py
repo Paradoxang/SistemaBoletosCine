@@ -60,3 +60,5 @@ if __name__ == "__main__":
     conexion = ConexionMongoDB(uri)
     conexion.conectar("venta_boletos")
     main(conexion)
+
+##69

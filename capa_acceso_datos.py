@@ -26,4 +26,4 @@ conexion = ConexionMongoDB(uri)
 conexion.conectar('venta_boletos')
 db = conexion.obtener_db()
 
-##45
+##69
