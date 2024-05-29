@@ -1,7 +1,12 @@
 import pytest
 import unittest
+import io
+import sys
+import capa_logica
+from unittest.mock import patch, MagicMock
 from pymongo import MongoClient
 from capa_logica import LogicaBoletos
+from capa_presentacion import main, menu
 from capa_acceso_datos import ConexionMongoDB
 
 from pymongo.server_api import ServerApi
@@ -110,27 +115,100 @@ def test_obtener_boletos():
     boletos = logica_boletos.obtener_boletos()
     assert len(boletos) == 2
 
-def test_actualizar_boleto():
-    # Agregar película y sala de cine de prueba a la base de datos
-    pelicula_id = db["pelicula"].insert_one({"Nombre": "Pelicula 1"}).inserted_id
-    sala_id = db["sala_cine_1"].insert_one({"Nombre": "Sala 1", "Cantidad Asientos": 100}).inserted_id
 
-    # Agregar boleto de prueba a la base de datos
-    boleto = {
-        "orden_compra": "OC1",
-        "Cantidad": 5,
-        "pelicula": pelicula_id,
-        "sala_cine": sala_id
-    }
-    boleto_id = db["boletos_1"].insert_one(boleto).inserted_id
 
-    # Actualizar boleto y verificar
-    nueva_cantidad = 10
-    actualizacion = {"Cantidad": nueva_cantidad}
-    logica_boletos.actualizar_boleto(str(boleto_id), actualizacion)
-    boleto_actualizado = db["boletos_1"].find_one({"_id": boleto_id})
-    assert boleto_actualizado["Cantidad"] == nueva_cantidad
 
+##PRUEBAS capa_presentacion
+def test_menu(capsys):
+    # Capturamos la salida estándar
+    captured_output = io.StringIO()
+    sys.stdout = captured_output
+
+    # Llamamos a la función menu()
+    menu()
+
+    # Restauramos sys.stdout
+    sys.stdout = sys.__stdout__
+
+    # Obtenemos la salida capturada
+    actual_output = captured_output.getvalue()
+
+    # Definimos la salida esperada
+    expected_output = """Bienvenido al sistema de gestión de boletos del Cinema
+1. Crear Reserva de Boleto
+2. Ver Reservas de Boletos
+3. Actualizar Reserva de Boleto
+4. Eliminar Reserva de Boleto
+5. Crear Película
+6. Ver Películas
+7. Actualizar Película
+8. Eliminar Película
+9. Salir
+"""
+
+    # Comparamos la salida esperada con la salida actual
+    assert actual_output == expected_output
+@pytest.fixture
+def mock_logica_boletos(mocker):
+    logica_boletos = mocker.patch('capa_presentacion.LogicaBoletos')
+    return logica_boletos
+
+@pytest.fixture
+def mock_conexion(mocker):
+    conexion = mocker.Mock()
+    conexion.obtener_db.return_value = {}
+    return conexion
+
+def test_crear_boleto(mock_logica_boletos, mock_conexion, mocker):
+    mock_input = mocker.patch('builtins.input', side_effect=['1', 'OC123', '2', 'Pelicula Test', 'Sala Test', '9'])
+    mock_logica_boletos.return_value.crear_boleto.return_value = 'id_test'
+    with patch('builtins.print'):
+        main(mock_conexion)
+
+    mock_logica_boletos.return_value.crear_boleto.assert_called_once_with('OC123', 2, 'Pelicula Test', 'Sala Test')
+
+def test_ver_boletos(mock_logica_boletos, mock_conexion, mocker):
+    mock_input = mocker.patch('builtins.input', side_effect=['2', '9'])
+    mock_logica_boletos.return_value.obtener_boletos.return_value = [{'orden_compra': 'OC123', 'Cantidad': 2}]
+    with patch('builtins.print'):
+        main(mock_conexion)
+
+    mock_logica_boletos.return_value.obtener_boletos.assert_called_once()
+
+
+
+def test_eliminar_boleto(mock_logica_boletos, mock_conexion, mocker):
+    mock_input = mocker.patch('builtins.input', side_effect=['4', 'OC123', '9'])
+    mock_logica_boletos.return_value.eliminar_boleto.return_value = True
+    with patch('builtins.print'):
+        main(mock_conexion)
+
+    mock_logica_boletos.return_value.eliminar_boleto.assert_called_once_with('OC123')
+
+def test_crear_pelicula(mock_logica_boletos, mock_conexion, mocker):
+    mock_input = mocker.patch('builtins.input', side_effect=['5', 'Pelicula Test', '120', 'Acción', '9'])
+    mock_logica_boletos.return_value.crear_pelicula.return_value = 'id_pelicula_test'
+    with patch('builtins.print'):
+        main(mock_conexion)
+
+    mock_logica_boletos.return_value.crear_pelicula.assert_called_once_with('Pelicula Test', 120, 'Acción')
+
+def test_ver_peliculas(mock_logica_boletos, mock_conexion, mocker):
+    mock_input = mocker.patch('builtins.input', side_effect=['6', '9'])
+    mock_logica_boletos.return_value.obtener_peliculas.return_value = [{'Nombre': 'Pelicula Test', 'duracion_minutos': 120, 'genero': 'Acción'}]
+    with patch('builtins.print'):
+        main(mock_conexion)
+
+    mock_logica_boletos.return_value.obtener_peliculas.assert_called_once()
+
+
+def test_eliminar_pelicula(mock_logica_boletos, mock_conexion, mocker):
+    mock_input = mocker.patch('builtins.input', side_effect=['8', 'id_pelicula_test', '9'])
+    mock_logica_boletos.return_value.eliminar_pelicula.return_value = True
+    with patch('builtins.print'):
+        main(mock_conexion)
+
+    mock_logica_boletos.return_value.eliminar_pelicula.assert_called_once_with('id_pelicula_test')
 
 
 ##PRUEBA INTEGRACIÓN

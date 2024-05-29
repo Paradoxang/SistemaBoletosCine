@@ -18,8 +18,8 @@ def main(conexion):
     opciones = {
         '1': ('crear_boleto', ['Orden de Compra', 'Cantidad', 'Nombre de la Película', 'Nombre de la Sala de Cine']),
         '2': ('obtener_boletos', []),
-        '3': ('actualizar_boleto', ['ID de la Reserva a actualizar', 'Nuevo Número de Orden de Compra', 'Nueva Cantidad', 'Nuevo Nombre de Película', 'Nuevo Nombre de la Sala de Cine']),
-        '4': ('eliminar_boleto', ['ID de la Reserva a eliminar']),
+        '3': ('actualizar_boleto', ['Orden de Compra a actualizar', 'Nueva Cantidad', 'Nuevo Nombre de Película', 'Nuevo Nombre de la Sala de Cine']),
+        '4': ('eliminar_boleto', ['Orden de Compra a eliminar']),
         '5': ('crear_pelicula', ['Nombre de la Película', 'Duración (minutos)', 'Género']),
         '6': ('obtener_peliculas', []),
         '7': ('actualizar_pelicula', ['ID de la Película a actualizar', 'Nuevo Nombre', 'Nueva Duración', 'Nuevo Género']),

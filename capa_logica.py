@@ -52,8 +52,8 @@ class LogicaBoletos:
             boleto["Nombre_sala"] = sala["Nombre"] if sala else "Desconocido"
         return boletos
 
-    def obtener_boleto_por_id(self, boleto_id):
-        boleto = self.boletos_collection.find_one({"_id": ObjectId(boleto_id)})
+    def obtener_boleto_por_orden_compra(self, orden_compra):
+        boleto = self.boletos_collection.find_one({"orden_compra": orden_compra})
         if boleto:
             pelicula = self.peliculas_collection.find_one({"_id": boleto["pelicula"]})
             sala = self.salas_collection.find_one({"_id": boleto["sala_cine"]})
@@ -61,7 +61,12 @@ class LogicaBoletos:
             boleto["Nombre_sala"] = sala["Nombre"] if sala else "Desconocido"
         return boleto
 
-    def actualizar_boleto(self, boleto_id, actualizacion):
+    def actualizar_boleto(self, orden_compra, actualizacion):
+        boleto = self.boletos_collection.find_one({"orden_compra": orden_compra})
+        if not boleto:
+            print(f"Error: No se encontró ningún boleto con la orden de compra '{orden_compra}'.")
+            return None
+
         if "Nombre_pelicula" in actualizacion:
             pelicula = self.peliculas_collection.find_one({"Nombre": actualizacion["Nombre_pelicula"]})
             if not pelicula:
@@ -78,10 +83,14 @@ class LogicaBoletos:
             actualizacion["sala_cine"] = sala["_id"]
             del actualizacion["Nombre_sala"]
 
-        return self.boletos_collection.update_one({"_id": ObjectId(boleto_id)}, {"$set": actualizacion})
+        return self.boletos_collection.update_one({"orden_compra": orden_compra}, {"$set": actualizacion})
 
-    def eliminar_boleto(self, boleto_id):
-        return self.boletos_collection.delete_one({"_id": ObjectId(boleto_id)})
+    def eliminar_boleto(self, orden_compra):
+        boleto = self.boletos_collection.find_one({"orden_compra": orden_compra})
+        if not boleto:
+            print(f"Error: No se encontró ningún boleto con la orden de compra '{orden_compra}'.")
+            return None
+        return self.boletos_collection.delete_one({"orden_compra": orden_compra})
 
     # Operaciones CRUD para Películas
     def crear_pelicula(self, nombre, duracion_minutos, genero):
