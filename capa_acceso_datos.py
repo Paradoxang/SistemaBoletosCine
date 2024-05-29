@@ -17,6 +17,10 @@ class ConexionMongoDB:
     def obtener_db(self):
         return self.db
 
+    def cerrar_conexion(self):
+        if self.client:
+            self.client.close()
+
 uri = "mongodb+srv://MirandaYo:Paradoxa10@cluster0.zlkxkhi.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 conexion = ConexionMongoDB(uri)
 conexion.conectar('venta_boletos')
