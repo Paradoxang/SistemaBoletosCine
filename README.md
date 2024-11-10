@@ -1,8 +1,7 @@
 # Sistema de Gestión de Boletos del Cine
-Este es el taller final del curso de ingeniería de software 2
 
 
-**IDEA GENERAL:** Este es el proyecto final del curso de Ingeniería de Software 2. El objetivo de este proyecto es desarrollar un software sencillo para la compra y gestión de boletos de cine, implementando operaciones CRUD (Crear, Leer, Actualizar, Eliminar). El software está diseñado con una arquitectura de tres capas y utiliza MongoDB para el almacenamiento de datos.
+**IDEA GENERAL:** El objetivo de este proyecto es desarrollar un software sencillo para la compra y gestión de boletos de cine, implementando operaciones CRUD (Crear, Leer, Actualizar, Eliminar). El software está diseñado con una arquitectura de tres capas y utiliza MongoDB para el almacenamiento de datos.
 
 **Arquitectura del Sistema:** El sistema está dividido en tres capas principales:
 
